@@ -32,6 +32,32 @@ Target: x86_64-unknown-linux-gnu
 $ wasmer run add.wasm --invoke add -- 2 3
 5
 ```
+- however, looks like `wasmer` doesn't generate bytecode that can be executed from Node:
+```
+$ node hello.js 
+[CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 00 77 61 73 @+0]
+```
+- tried a few different compiler options (`--cranelift`, `--llvm`, ...) but no luck
+- from `wasmer` docs it's unclear if it can be used for simply translating the WAT to WASM bytecode
+- need to use `wat2wasm` from https://github.com/WebAssembly/wabt
+- 
+```
+$ cd ~/code && git clone --recursive https://github.com/WebAssembly/wabt
+$ cd wabt/
+$ git submodule update --init
+$ mkdir build
+$ cd build/
+$ cmake ..
+$ cmake --build . # this takes a few minutes
+$ cp wat2wasm ~/bin # put the resulting binary somewhere in your path
+$ cd ~/code/learning-webassembly
+$ wat2wasm hello.wat
+$ file hello.wasm 
+hello.wasm: WebAssembly (wasm) binary module version 0x1 (MVP)
+
+$ node hello.js
+hello from wasm!
+```
 
 ## Resources
 ### WASM
